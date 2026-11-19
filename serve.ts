@@ -1,65 +1,48 @@
-// A tiny static server for app/ (Node 22, standard library only), so the
-// cover maker can be tried locally without a build step:
-//   node serve.ts [--port 8080]
-// Serves app/ on http://localhost:8080. Sends the MIME types an offline web
-// app needs and refuses any path outside app/. Development convenience only.
+// serve.ts — tiny static server for local testing (Node 22, stdlib only).
+// Serves app/ on http://localhost:8123/ so the app can be smoke-tested
+// offline in a browser. No dependencies, no logging of photos.
+import { createServer } from "node:http";
+import { readFile } from "node:fs/promises";
+import { existsSync } from "node:fs";
+import { dirname, extname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
-import { createReadStream, statSync } from 'node:fs';
-import { createServer } from 'node:http';
-import { extname, join, normalize, resolve, sep } from 'node:path';
-import { fileURLToPath } from 'node:url';
+const root = resolve(dirname(fileURLToPath(import.meta.url)), "app");
+const port = Number(process.env.PORT || 8123);
 
-const root = resolve(fileURLToPath(new URL('./app', import.meta.url)));
-const args = process.argv.slice(2);
-const portArg = args.indexOf('--port');
-const wanted = portArg === -1 ? 8080 : Number(args[portArg + 1]);
-const port = Number.isInteger(wanted) && wanted > 0 && wanted < 65536 ? wanted : 8080;
-
-const MIME = {
-  '.html': 'text/html; charset=utf-8',
-  '.js': 'text/javascript; charset=utf-8',
-  '.mjs': 'text/javascript; charset=utf-8',
-  '.css': 'text/css; charset=utf-8',
-  '.json': 'application/json; charset=utf-8',
-  '.png': 'image/png',
-  '.jpg': 'image/jpeg',
-  '.jpeg': 'image/jpeg',
-  '.ttf': 'font/ttf',
-  '.woff': 'font/woff',
-  '.woff2': 'font/woff2',
-  '.txt': 'text/plain; charset=utf-8',
+const TYPES: Record<string, string> = {
+  ".html": "text/html; charset=utf-8",
+  ".css": "text/css; charset=utf-8",
+  ".js": "text/javascript; charset=utf-8",
+  ".mjs": "text/javascript; charset=utf-8",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".png": "image/png",
+  ".ttf": "font/ttf",
+  ".txt": "text/plain; charset=utf-8",
+  ".json": "application/json; charset=utf-8",
 };
 
-createServer((req, res) => {
-  const url = new URL(req.url ?? '/', 'http://localhost');
-  let path = url.pathname;
+const server = createServer(async (req, res) => {
   try {
-    path = decodeURIComponent(path);
-  } catch {
-    res.writeHead(400).end('bad request');
-    return;
+    const url = new URL(req.url || "/", "http://localhost");
+    let path = decodeURIComponent(url.pathname);
+    if (path === "/") path = "/index.html";
+    const file = resolve(join(root, "." + path));
+    if (!file.startsWith(root) || !existsSync(file)) {
+      res.writeHead(404, { "content-type": "text/plain" });
+      res.end("not found\n");
+      return;
+    }
+    const body = await readFile(file);
+    res.writeHead(200, { "content-type": TYPES[extname(file)] || "application/octet-stream" });
+    res.end(body);
+  } catch (err) {
+    res.writeHead(500, { "content-type": "text/plain" });
+    res.end(String(err));
   }
-  if (path.endsWith('/')) path += 'index.html';
-  const file = resolve(join(root, normalize(path)));
-  if (file !== root && !file.startsWith(root + sep)) {
-    res.writeHead(403).end('forbidden');
-    return;
-  }
-  let size;
-  try {
-    const st = statSync(file);
-    if (!st.isFile()) throw new Error('not a file');
-    size = st.size;
-  } catch {
-    res.writeHead(404).end('not found');
-    return;
-  }
-  res.writeHead(200, {
-    'content-type': MIME[extname(file).toLowerCase()] ?? 'application/octet-stream',
-    'content-length': size,
-    'cache-control': 'no-store',
-  });
-  createReadStream(file).pipe(res);
-}).listen(port, '127.0.0.1', () => {
-  console.log(`app/ is on http://localhost:${port}`);
+});
+
+server.listen(port, () => {
+  console.log(`Sunset Sleeve dev server: http://localhost:${port}/`);
 });

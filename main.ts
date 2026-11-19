@@ -1,36 +1,42 @@
-// Sunset Sleeve — the gta6-cover-art-01 entry program (Node 22, stdlib only).
-// Hands the app in: copies this directory's app/ and screenshots/ to the
-// output directory and writes /output/dossier.json with the vendored
-// make.fun library, so the judge can read the app and its cover.
-// Locally, MAKEFUN_OUTPUT_DIR stands in for /output:
-//   MAKEFUN_OUTPUT_DIR=out node main.ts
+// main.ts — entrypoint for the Sunset Sleeve package (Node 22, stdlib only).
+// Copies app/ and screenshots/ into the output directory and writes
+// /output/dossier.json via vendor/makefun-app.ts buildDossier.
+//
+// Usage:  MAKEFUN_OUTPUT_DIR=out node main.ts
+//         (defaults to ./out when the env var is unset)
+import { buildDossier } from "./vendor/makefun-app.ts";
+import { cpSync, existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
-import { cpSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { buildDossier } from './vendor/makefun-app.ts';
+const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)));
+const outDir = resolve(process.env.MAKEFUN_OUTPUT_DIR || join(repoRoot, "out"));
 
-// The directory this file lives in — app/ and screenshots/ sit beside it.
-const root = fileURLToPath(new URL('.', import.meta.url));
-const outDir = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
-
-// The caps the bounty scorer enforces (its reference/gate.json): only
-// text_max_bytes shapes the dossier's bytes; the rest refuse an entry the
-// scorer would refuse, so this program fails the same way, early, locally.
-const CAPS = {
-  text_max_bytes: 163840,
-  screenshots: { max: 4, max_bytes: 262144 },
+const caps = {
+  text_max_bytes: 160 * 1024,
+  screenshots: { max: 4, max_bytes: 256 * 1024 },
   app_max_files: 993,
-  app_max_bytes: 50331648,
+  app_max_bytes: 48 * 1024 * 1024,
   app_path_max_bytes: 1000,
 };
 
-mkdirSync(outDir, { recursive: true });
-cpSync(join(root, 'app'), join(outDir, 'app'), { recursive: true });
-mkdirSync(join(outDir, 'screenshots'), { recursive: true });
-if (existsSync(join(root, 'screenshots'))) {
-  cpSync(join(root, 'screenshots'), join(outDir, 'screenshots'), { recursive: true });
+function copyTree(name: string): void {
+  const src = join(repoRoot, name);
+  if (!existsSync(src)) {
+    throw new Error(`missing ${name}/ in ${repoRoot} — nothing to hand in`);
+  }
+  cpSync(src, join(outDir, name), { recursive: true });
 }
 
-writeFileSync(join(outDir, 'dossier.json'), buildDossier(outDir, CAPS));
-console.log(`Sunset Sleeve handed in to ${outDir}`);
+function main(): void {
+  rmSync(outDir, { recursive: true, force: true });
+  mkdirSync(outDir, { recursive: true });
+  copyTree("app");
+  copyTree("screenshots");
+  const dossier = buildDossier(outDir, caps);
+  writeFileSync(join(outDir, "dossier.json"), dossier);
+  console.log(`wrote ${join(outDir, "dossier.json")} (${dossier.length} bytes)`);
+  console.log(`handed in app/ + screenshots/ to ${outDir}`);
+}
+
+main();

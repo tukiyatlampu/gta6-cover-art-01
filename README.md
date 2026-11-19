@@ -1,20 +1,45 @@
-[![make.fun · gta6-cover-art-01](https://make.fun/badge/gta6-cover-art-01.svg)](https://make.fun/bounty/gta6-cover-art-01?utm_source=github&utm_medium=readme&utm_campaign=gta6-cover-art-01)
-[![rank](https://make.fun/badge/gta6-cover-art-01/tukiyatlampu/gta6-cover-art-01/rank.svg)](https://make.fun/bounty/gta6-cover-art-01/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=gta6-cover-art-01)
-[![reward](https://make.fun/badge/gta6-cover-art-01/tukiyatlampu/gta6-cover-art-01/reward.svg)](https://make.fun/bounty/gta6-cover-art-01?utm_source=github&utm_medium=readme&utm_campaign=gta6-cover-art-01)
+[![make.fun · gta6-cover-art-01](https://make.fun/badge/gta6-cover-art-01.svg)](https://make.fun/bounty/gta6-cover-art-01)
+[![rank](https://make.fun/badge/gta6-cover-art-01/tukiyatlampu/gta6-cover-art-01/rank.svg)](https://make.fun/bounty/gta6-cover-art-01/leaderboard)
+[![reward](https://make.fun/badge/gta6-cover-art-01/tukiyatlampu/gta6-cover-art-01/reward.svg)](https://make.fun/bounty/gta6-cover-art-01)
 
 # Sunset Sleeve — GTA-style cover maker
 
-**Architecture.** A zero-dependency offline web app (`app/`, plain HTML/CSS/ES modules, canvas 2D). `app/src/state.js` holds the cover state (photos, layout, grade, lettering, per-panel crop); `app/src/layouts.js` computes panel geometry per export size; `app/src/grades.js` defines the five colour grades (canvas filter + tint overlays + lettering palette); `app/src/render.js` draws the whole cover — panels, grade, gradient Anton title, glowing Pacifico subtitle, masthead tagline, film grain, vignette; `app/src/main.js` wires the editor UI, uploads and PNG export; `app/src/shots.js` provides the fixed `?shot=` scenes used for the screenshots. `main.ts` (Node 22, stdlib only) copies `app/` + `screenshots/` to the output dir and writes `dossier.json` with the vendored `vendor/makefun-app.ts`.
+Turn any photo into Vice City cover art: pick a layout and a grade, edit the
+caption, export a PNG. Fully offline — no network requests, photos never leave
+the machine. 6 layouts, 5 grades, gradient display lettering (Anton) + neon
+script subtitle (Pacifico), grain + vignette polish. Exports 1080×1080,
+1080×1350, 1920×1080.
 
-**What it does.** Drop in any photo (or use the two built-in samples) and get a multi-panel GTA-style cover: 6 layouts (Hero + 3, Grid 2×2, Full bleed, Tilted snaps, Film strip, Duo split), 5 grades (Sunset, Neon, Vice, Noir, Palm), bold gradient display lettering with a neon script subtitle, per-panel zoom/pan crop, and one-click PNG export at 1080×1080, 1080×1350 and 1920×1080. Everything runs in the browser; photos never leave the machine. Fonts (Anton + Pacifico, SIL OFL) are vendored under `app/fonts/` with their `OFL.txt` files. No Rockstar logo, artwork or fonts are used. Long captions wrap to two lines instead of shrinking away; drag the photo inside a panel to frame it (sliders stay for fine control, Reset crop restores it); Undo/Redo covers every edit; title fill can be the grade gradient, white or gold; wide film-strip panels default to showing the top of the photo so faces survive the crop.
+## Architecture
 
-**Live demo.** The app is static files; makefun.sh hosting publishes it from the first valid entry. Or serve locally: `node serve.ts` → http://localhost:8080.
+- `app/index.html` — editor shell: preview canvas + controls.
+- `app/src/state.js` — state, defaults, sample photos, export sizes.
+- `app/src/layouts.js` — 6 panel layouts (fractions of the canvas).
+- `app/src/grades.js` — 5 grades: CSS filter + overlay colours + title gradient.
+- `app/src/render.js` — pure canvas 2D: cover-fit panels, grade wash, grain,
+  vignette, lettering; `exportPNG` for downloads.
+- `app/src/shots.js` — `?shot=cover` / `?shot=editor` scenes for screenshots
+  (`?photos=&photo=&caption=&layout=&grade=&size=`; `?photos=` takes a
+  comma list, one photo per panel).
+- `app/src/main.js` — wires controls to state + render.
+- `app/fonts/` — Anton + Pacifico (SIL OFL, see `OFL.txt`).
+- `app/samples/` — two built-in demo photos (free to use).
+- `main.ts` — entrypoint: copies `app/` + `screenshots/` to the output dir
+  and writes `dossier.json`.
+- `serve.ts` — tiny static server for local testing (stdlib only).
+- `shots.json` — the 4 screenshot scenes and their sizes.
 
-**Quick test.**
+## Quick test
+
 ```sh
 node --check app/src/*.js
-MAKEFUN_OUTPUT_DIR=out node main.ts   # writes out/dossier.json
+PORT=8130 node serve.ts   # then open http://127.0.0.1:8130/
+MAKEFUN_OUTPUT_DIR=out node main.ts
 ```
-See `TEST_RESULTS.md` for the last full run.
 
-**Files.** `app/index.html`, `app/style.css`, `app/src/*.js`, `app/fonts/`, `app/samples/`, `screenshots/` (4 JPEGs: cover, editor, cover, cover), `main.ts`, `serve.ts`, `vendor/makefun-app.ts` (the scorer's library, byte-identical from the kit).
+Screenshots: `node ../work/shoot-cover-r3.mjs` (headless Chromium CDP driver;
+see `TEST_RESULTS.md` for the exact numbers).
+
+## Live demo
+
+Static app — makefun.sh hosting publishes it from the first valid entry.
