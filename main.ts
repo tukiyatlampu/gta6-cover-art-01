@@ -3,14 +3,17 @@
 // /output/dossier.json via vendor/makefun-app.ts buildDossier.
 //
 // Usage:  MAKEFUN_OUTPUT_DIR=out node main.ts
-//         (defaults to ./out when the env var is unset)
+//         (defaults to /output when the env var is unset)
 import { buildDossier } from "./vendor/makefun-app.ts";
 import { cpSync, existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)));
-const outDir = resolve(process.env.MAKEFUN_OUTPUT_DIR || join(repoRoot, "out"));
+// The grader mounts the repo read-only at /bot and the writable output at
+// /output, without setting MAKEFUN_OUTPUT_DIR — so the default must be
+// /output, never a path under the repo (that threw EROFS and exited 1).
+const outDir = resolve(process.env.MAKEFUN_OUTPUT_DIR || '/output');
 
 const caps = {
   text_max_bytes: 160 * 1024,

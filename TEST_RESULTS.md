@@ -112,3 +112,27 @@ so the editor screenshot shows the whole editor — caption, all 6 layouts,
 all 5 grades, per-panel photo, polish, all 3 export sizes — in one
 1280×1280 frame at full text size. The real app is unchanged; the editor
 shot is now 1280×1280 (was 1280×720, title clipped, lower sections cut).
+
+## Round 4 fix — run_completes (2026-11-20 ~00:47 WIB)
+
+Round 3 was rejected on one check only: `run_completes` — the dev grade run
+exited 1. Every other check passed, including `transcripts_witnessed`.
+
+Cause (proven from the harness source `grader/program.ts` + `images.ts`):
+the grader runs `node /bot/main.ts` in a container where the repo is mounted
+read-only at /bot and the writable output at /output, and it does NOT set
+`MAKEFUN_OUTPUT_DIR`. The round-3 `main.ts` defaulted to
+`join(repoRoot, "out")` (= /bot/out, read-only) when the variable was unset,
+so `rmSync`/`mkdirSync` threw EROFS and the program exited 1. The kit
+starter and the round-1 `main.ts` both default to `/output`.
+
+Fix (one line in `main.ts`, plus a comment):
+`const outDir = resolve(process.env.MAKEFUN_OUTPUT_DIR || '/output');`
+
+Verification:
+- `MAKEFUN_OUTPUT_DIR=out node main.ts` → exit 0; dossier.json
+  sha256 `bc5e41195499027ec3bb0c347c84a40f25837506092e14da418c6f1834373565`,
+  byte-identical to the pre-fix dossier (main.ts is not part of the dossier).
+- Grader simulation (read-only copy of the package, `MAKEFUN_OUTPUT_DIR`
+  unset) → exit 0, `/output/dossier.json` written, same sha256.
+  /output and the simulation copy were removed afterwards.
