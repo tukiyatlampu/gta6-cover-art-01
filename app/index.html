@@ -3,97 +3,83 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Sunset Sleeve — GTA-style cover maker</title>
-<link rel="stylesheet" href="./style.css">
+<title>Sunset Sleeve — GTA 6-style Cover Art Maker</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 <header class="topbar">
-  <div class="brand">
-    <span class="brand-mark">SS</span>
-    <div>
-      <h1>Sunset Sleeve</h1>
-      <p>Turn any photo into a GTA-style multi-panel cover. Offline — your photos never leave this machine.</p>
-    </div>
+  <div>
+    <h1>Sunset Sleeve</h1>
+    <p class="tag">Turn any photo into Vice City cover art — offline, on your machine.</p>
   </div>
   <div class="top-actions">
-    <button id="undo" type="button" disabled>Undo</button>
-    <button id="redo" type="button" disabled>Redo</button>
-    <button id="export-all" type="button" class="btn-primary">Export all 3 sizes</button>
+    <button id="exportBtn" type="button" class="primary">Export PNG</button>
+    <button id="resetBtn" type="button">Reset</button>
   </div>
 </header>
 
-<main class="app">
-  <aside class="controls" aria-label="Cover controls">
-    <section class="group">
-      <h2>1 · Photos</h2>
-      <p class="hint">Pick a sample or upload your own. Click a tray photo, then a panel below, to place it.</p>
-      <div id="tray" class="tray"></div>
-      <label class="upload">Upload a photo
-        <input id="upload" type="file" accept="image/*" multiple>
-      </label>
-      <p class="hint" id="tray-status"></p>
-    </section>
-
-    <section class="group">
-      <h2>2 · Layout <span class="scope-badge global">Whole cover</span></h2>
-      <div id="layouts" class="picker" role="radiogroup" aria-label="Layout"></div>
-    </section>
-
-    <section class="group">
-      <h2>3 · Grade <span class="scope-badge global">Whole cover</span></h2>
-      <div id="grades" class="picker" role="radiogroup" aria-label="Grade"></div>
-    </section>
-
-    <section class="group">
-      <h2>4 · Lettering <span class="scope-badge global">Whole cover</span></h2>
-      <label>Caption
-        <input id="caption" type="text" maxlength="28" value="Sunset Heist" autocomplete="off">
-      </label>
-      <label>Script subtitle
-        <input id="subtitle" type="text" maxlength="40" value="one last ride" autocomplete="off">
-      </label>
-      <label>Tagline
-        <input id="tagline" type="text" maxlength="24" value="NEON SHORES" autocomplete="off">
-      </label>
-      <div>
-        <span class="field-label">Title fill</span>
-        <div id="title-styles" class="picker" role="radiogroup" aria-label="Title fill"></div>
-      </div>
-    </section>
-
-    <section class="group">
-      <h2>5 · Selected panel <span id="panel-scope" class="scope-badge panel">Panel 1</span></h2>
-      <div id="panels" class="picker" role="radiogroup" aria-label="Selected panel"></div>
-      <label>Zoom <span class="val" id="zoom-val">1.15×</span>
-        <input id="zoom" type="range" min="1" max="3" step="0.01" value="1.15">
-      </label>
-      <label>Pan left–right <span class="val" id="panx-val">0</span>
-        <input id="panx" type="range" min="-1" max="1" step="0.01" value="0">
-      </label>
-      <label>Pan up–down <span class="val" id="pany-val">0</span>
-        <input id="pany" type="range" min="-1" max="1" step="0.01" value="0">
-      </label>
-      <p class="hint">Tip: drag the photo inside the selected panel to move it.</p>
-      <button id="reset-crop" type="button">Reset crop</button>
-    </section>
-
-    <section class="group">
-      <h2>6 · Export PNG</h2>
-      <div class="export-row">
-        <button id="exp-square" type="button">1080 × 1080</button>
-        <button id="exp-portrait" type="button">1080 × 1350</button>
-        <button id="exp-wide" type="button">1920 × 1080</button>
-      </div>
-      <p id="status" class="status" role="status"></p>
-    </section>
-  </aside>
-
+<main class="shell">
   <section class="stage" aria-label="Cover preview">
-    <canvas id="cover" width="1080" height="1080" aria-label="Cover preview"></canvas>
-    <p class="stage-hint">Click a panel in the preview to select it, then crop it with the sliders.</p>
+    <canvas id="preview" width="1080" height="1080"></canvas>
+    <p class="size-line">Preview <span id="sizeLabel">1080 × 1080</span> · exports at full size</p>
   </section>
+
+  <aside class="panel" aria-label="Editor">
+    <section>
+      <h2>Caption</h2>
+      <label>Title <input id="title" type="text" maxlength="24" autocomplete="off"></label>
+      <label>Script subtitle <input id="subtitle" type="text" maxlength="40" autocomplete="off"></label>
+      <label>Tagline <input id="tagline" type="text" maxlength="40" autocomplete="off"></label>
+    </section>
+
+    <section>
+      <h2>Layout — 6 ways</h2>
+      <div id="layoutList" class="picker"></div>
+    </section>
+
+    <section>
+      <h2>Grade — 5 looks</h2>
+      <div id="gradeList" class="picker"></div>
+    </section>
+
+    <section>
+      <h2>Photo per panel</h2>
+      <div id="panelList" class="chips"></div>
+      <p id="panelNote" class="hint"></p>
+      <div class="upload-row">
+        <label class="file-btn">Upload photo
+          <input id="upload" type="file" accept="image/*">
+        </label>
+        <button id="samplePier" type="button">Sample: Pier</button>
+        <button id="sampleBoulevard" type="button">Sample: Boulevard</button>
+      </div>
+      <label>Zoom <span id="zoomVal"></span>
+        <input id="zoom" type="range" min="1" max="2.5" step="0.01" value="1">
+      </label>
+      <label>Position X <span id="panXVal"></span>
+        <input id="panX" type="range" min="-0.5" max="0.5" step="0.01" value="0">
+      </label>
+      <label>Position Y <span id="panYVal"></span>
+        <input id="panY" type="range" min="-0.5" max="0.5" step="0.01" value="0">
+      </label>
+    </section>
+
+    <section>
+      <h2>Polish</h2>
+      <label>Grain <input id="grain" type="range" min="0" max="1" step="0.05" value="0.5"></label>
+      <label>Vignette <input id="vignette" type="range" min="0" max="1" step="0.05" value="0.55"></label>
+    </section>
+
+    <section>
+      <h2>Export size</h2>
+      <div id="sizeList" class="picker"></div>
+    </section>
+
+    <p id="status" class="status" role="status">Loading…</p>
+    <p class="hint">Offline app. Your photos never leave this machine. Fonts: Anton + Pacifico (SIL OFL, see fonts/OFL.txt). No Rockstar artwork, logos, or fonts.</p>
+  </aside>
 </main>
 
-<script type="module" src="./src/main.js"></script>
+<script type="module" src="src/main.js"></script>
 </body>
 </html>

@@ -1,139 +1,163 @@
 @font-face {
-  font-family: 'Anton';
-  src: url('./fonts/anton/Anton-Regular.ttf') format('truetype');
+  font-family: "Anton";
+  src: url("fonts/Anton-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
   font-display: swap;
 }
 @font-face {
-  font-family: 'Pacifico';
-  src: url('./fonts/pacifico/Pacifico-Regular.ttf') format('truetype');
+  font-family: "Pacifico";
+  src: url("fonts/Pacifico-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
   font-display: swap;
 }
 
-:root {
-  --bg: #14091f;
-  --bg2: #1e0f2e;
-  --panel: #241238;
-  --line: #3d2358;
-  --ink: #f6efff;
-  --muted: #b9a6cf;
-  --pink: #ff2e88;
-  --orange: #ff7a3d;
-  --cyan: #22e6ff;
-  --gold: #ffd76a;
-}
-
 * { box-sizing: border-box; }
-html, body { margin: 0; min-height: 100%; }
 body {
-  background: radial-gradient(1200px 600px at 80% -10%, #3a1550 0%, transparent 60%),
-    radial-gradient(900px 500px at -10% 110%, #4d1030 0%, transparent 55%), var(--bg);
-  color: var(--ink);
-  font: 15px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+  margin: 0;
+  background: #12081f;
+  color: #f5eefc;
+  font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
 }
-
 .topbar {
-  display: flex; align-items: center; justify-content: space-between; gap: 16px;
-  padding: 14px 22px; border-bottom: 1px solid var(--line);
-  background: rgba(20, 9, 31, 0.85);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 20px;
+  background: linear-gradient(90deg, #ff5e3a, #a81c78 55%, #2b0f4d);
+  border-bottom: 3px solid #ffd166;
 }
-.brand { display: flex; gap: 14px; align-items: center; }
-.brand-mark {
-  width: 46px; height: 46px; border-radius: 10px; display: grid; place-items: center;
-  font-family: 'Anton', sans-serif; font-size: 20px; letter-spacing: 1px; color: #1a0b2e;
-  background: linear-gradient(135deg, var(--gold), var(--orange) 45%, var(--pink));
-  box-shadow: 0 0 22px rgba(255, 46, 136, 0.55);
+.topbar h1 {
+  margin: 0;
+  font-family: "Anton", sans-serif;
+  font-size: 34px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow: 0 2px 0 rgba(0,0,0,.35);
 }
-.brand h1 {
-  margin: 0; font-family: 'Anton', sans-serif; font-weight: 400;
-  font-size: 26px; letter-spacing: 2px; text-transform: uppercase;
-  background: linear-gradient(90deg, var(--gold), var(--orange), var(--pink), #c44dff);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-}
-.brand p { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
-
-.app { display: flex; gap: 24px; padding: 20px 22px 28px; align-items: flex-start; }
-.controls {
-  width: 320px; flex: none; display: flex; flex-direction: column; gap: 14px;
-  max-height: calc(100vh - 110px); overflow-y: auto; padding-right: 4px;
-}
-.group {
-  background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px;
-  display: flex; flex-direction: column; gap: 10px;
-}
-.group h2 { margin: 0; font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gold); }
-.hint { margin: 0; color: var(--muted); font-size: 12.5px; }
-label { display: flex; flex-direction: column; gap: 6px; font-weight: 600; font-size: 13px; }
-label .val { color: var(--cyan); font-weight: 400; margin-left: 6px; }
-input[type="text"] {
-  font: inherit; padding: 9px 10px; border-radius: 8px; border: 1px solid var(--line);
-  background: #160a24; color: var(--ink);
-}
-input[type="text"]:focus { outline: 2px solid var(--pink); outline-offset: 1px; }
-input[type="range"] { width: 100%; accent-color: var(--pink); }
-
+.topbar .tag { margin: 2px 0 0; opacity: .92; font-size: 13px; }
+.top-actions { display: flex; gap: 10px; flex-shrink: 0; }
 button {
-  font: inherit; font-weight: 700; padding: 10px 12px; border-radius: 8px; cursor: pointer;
-  border: 1px solid var(--line); background: #2c1745; color: var(--ink);
+  font: inherit;
+  color: #fff;
+  background: #2b1745;
+  border: 1px solid #6b4a9e;
+  border-radius: 8px;
+  padding: 8px 14px;
+  cursor: pointer;
 }
-button:hover { border-color: var(--pink); }
-button:disabled { opacity: 0.45; cursor: default; }
-button:disabled:hover { border-color: var(--line); }
-.field-label { display: block; font-weight: 600; font-size: 13px; margin-bottom: 6px; }
-.scope-badge {
-  font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
-  padding: 3px 7px; border-radius: 20px; vertical-align: 2px; margin-left: 6px;
+button:hover { border-color: #ffd166; }
+button.primary {
+  background: #ff5e3a;
+  border-color: #ffd166;
+  font-weight: 700;
 }
-.scope-badge.global { color: var(--gold); border: 1px solid var(--gold); }
-.scope-badge.panel { color: #06121a; background: var(--cyan); border: 1px solid var(--cyan); }
-button[aria-checked="true"], button.active {
-  background: linear-gradient(135deg, #ff7a3d, #ff2e88); border-color: transparent; color: #fff;
-  box-shadow: 0 0 16px rgba(255, 46, 136, 0.45);
-}
-.btn-primary {
-  background: linear-gradient(135deg, var(--gold), var(--orange) 50%, var(--pink));
-  border: 0; color: #1a0b2e; padding: 12px 18px;
-}
+button:disabled { opacity: .55; cursor: wait; }
 
-.picker { display: flex; flex-wrap: wrap; gap: 8px; }
-.picker button { padding: 8px 10px; font-size: 13px; }
-.swatch { display: inline-block; width: 14px; height: 14px; border-radius: 50%; vertical-align: -2px; margin-right: 6px; border: 1px solid rgba(255,255,255,0.5); }
-
-.tray { display: flex; gap: 8px; flex-wrap: wrap; }
-.tray button {
-  padding: 0; border-radius: 8px; overflow: hidden; border: 2px solid var(--line);
-  width: 76px; height: 56px; position: relative;
+.shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 20px;
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
 }
-.tray button img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.tray button[aria-checked="true"] { border-color: var(--cyan); box-shadow: 0 0 12px rgba(34, 230, 255, 0.5); }
-.tray button .slot-name {
-  position: absolute; left: 0; right: 0; bottom: 0; font-size: 10px; font-weight: 700;
-  background: rgba(10, 4, 18, 0.75); padding: 2px 4px; text-align: left;
+.stage { min-width: 0; }
+#preview {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 6px;
+  box-shadow: 0 12px 40px rgba(0,0,0,.55);
+  background: #1b1035;
 }
-.upload {
-  border: 1px dashed var(--line); border-radius: 8px; padding: 10px; text-align: center;
-  cursor: pointer; color: var(--cyan); font-weight: 700;
+.size-line { color: #cbb8e6; font-size: 13px; }
+
+.panel section {
+  background: #1d1033;
+  border: 1px solid #3a2360;
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 14px;
 }
-.upload input { display: none; }
-
-.export-row { display: flex; gap: 8px; flex-wrap: wrap; }
-.export-row button { flex: 1; min-width: 88px; }
-.status { margin: 0; min-height: 20px; color: var(--cyan); font-size: 13px; }
-
-.stage { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 12px; min-width: 0; }
-.stage canvas {
-  width: min(100%, calc(100vh - 190px)); height: auto; aspect-ratio: 1 / 1;
-  border-radius: 6px; box-shadow: 0 18px 60px rgba(0, 0, 0, 0.55), 0 0 0 1px var(--line);
-  cursor: crosshair; background: #000;
+.panel h2 {
+  margin: 0 0 10px;
+  font-size: 13px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #ffd166;
 }
-.stage-hint { margin: 0; color: var(--muted); font-size: 13px; }
-
-/* Screenshot scenes: cover alone fills the viewport; editor keeps the full UI. */
-body.shot-cover .topbar, body.shot-cover .controls, body.shot-cover .stage-hint { display: none; }
-body.shot-cover .app { padding: 0; }
-body.shot-cover .stage { width: 100%; }
-body.shot-cover .stage canvas { width: 100vw; height: 100vh; max-width: none; border-radius: 0; box-shadow: none; }
+.panel label { display: block; margin-bottom: 10px; font-size: 13px; }
+.panel input[type="text"] {
+  width: 100%;
+  margin-top: 4px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #6b4a9e;
+  background: #12081f;
+  color: #fff;
+  font: inherit;
+}
+.panel input[type="range"] { width: 100%; }
+.picker { display: grid; gap: 8px; }
+.pick {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 10px;
+  align-items: center;
+  text-align: left;
+  background: #241640;
+}
+.pick strong { font-size: 14px; }
+.pick span { font-size: 12px; color: #cbb8e6; }
+.pick.active { border-color: #ffd166; outline: 2px solid #ffd166; }
+.pick .swatch {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  grid-row: span 2;
+}
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.panel-chip.active { border-color: #ffd166; outline: 2px solid #ffd166; }
+.upload-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 12px; }
+.file-btn { display: inline-block; }
+.file-btn input { display: none; }
+.status { color: #9df0c8; font-size: 13px; }
+.hint { color: #a793c7; font-size: 12px; }
 
 @media (max-width: 900px) {
-  .app { flex-direction: column; }
-  .controls { width: 100%; max-height: none; }
+  .shell { grid-template-columns: 1fr; }
+  .topbar { flex-wrap: wrap; }
 }
+
+/* Screenshot scenes: cover mode shows only the artwork. */
+body.shot-cover-mode .topbar,
+body.shot-cover-mode .panel,
+body.shot-cover-mode .size-line { display: none; }
+body.shot-cover-mode .shell {
+  display: block;
+  padding: 0;
+  max-width: none;
+}
+body.shot-cover-mode #preview {
+  border-radius: 0;
+  box-shadow: none;
+  width: 100vw;
+  height: 100vh;
+  object-fit: contain;
+  background: #12081f;
+}
+
+/* Editor screenshot scene: two-column panel so the whole editor —
+   caption, all 6 layouts, all 5 grades, per-panel photo, polish and
+   all 3 export sizes — fits one 1280x1280 frame at full text size.
+   Same controls, rearranged for the shot; the real app is unchanged. */
+body.shot-editor .shell { grid-template-columns: minmax(0, 1fr) 700px; gap: 12px; padding: 12px; }
+body.shot-editor .panel { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; align-items: start; }
+body.shot-editor .panel section { padding: 10px; margin-bottom: 0; }
+body.shot-editor .panel .status,
+body.shot-editor .panel .hint { grid-column: 1 / -1; margin: 0; }
+body.shot-editor .topbar { padding: 8px 20px; }
+body.shot-editor .topbar h1 { font-size: 28px; }
