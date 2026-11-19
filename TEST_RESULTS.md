@@ -19,7 +19,7 @@ waited for `window.__shotReady`, captured JPEG quality 82.
 | 1-cover.jpg | hero-three / sunset, pier, 1080×1080 | true | 211,802 | 0 | 0 |
 | 2-editor.jpg | editor, grid-four / neon, boulevard, 1280×1000 | true | 203,372 | 0 | 0 |
 | 3-cover.jpg | tilted / vice, boulevard, "Boulevard Queen Of The Night", 1080×1080 | true | 195,854 | 0 | 0 |
-| 4-cover.jpg | strip / sunset, pier, 1080×1350 | true | 194,903 | 0 | 0 |
+| 4-cover.jpg | strip / sunset, pier, 1024×1280 | true | 166,550 | 0 | 0 |
 
 All 4 are ≤ 256 KiB (cap 262,144), long side ≤ 1280, short side ≥ 480.
 Every request the pages made was a `file://` load of the app's own files
@@ -52,11 +52,11 @@ Drove the real UI in headless Chrome (no errors):
 exit 0. `out/` holds `app/`, `screenshots/` (4 JPEGs) and `dossier.json`.
 
 ## 5. Gate limits (scorer caps) — PASS
-- dossier.json: 1,126,965 bytes (cap 1.5 MiB = 1,572,864)
+- dossier.json: 1,089,161 bytes (cap 1.5 MiB = 1,572,864)
 - dossier text: 50,149 bytes (cap 160 KiB = 163,840); all 8 source files
   included whole, no truncation line
 - app/: 20 files+directories (cap 993), 677,161 bytes (cap 48 MiB)
-- app/index.html: 3,709 bytes (cap 1 MiB)
+- app/index.html: 3,929 bytes (cap 1 MiB)
 - screenshots: 4 images, each ≤ 262,144 bytes (cap 4, 256 KiB each)
 - dossier schema: makefun/dossier/v1, cover = first screenshot (1-cover.jpg)
 
@@ -99,3 +99,10 @@ accordingly) and the QA matrix.
   cover" badge, the panel group carries a live "Panel N" badge, and the
   editor screenshot shows both badges alongside the selection outline.
   Pass 4 (final): 96/100 — both remaining gaps closed.
+
+## 7. Resubmit fix — screenshots gate (2026-11-19)
+
+- The submitted entry (submission 01a1f38c, commit 1b511eb5) passed all 30 intake/transcript checks, but its dev-phase gate failed: get_breakdown showed the `screenshots` part at 0/1 (total 3/4), judge_state gate_failed, "the house judge does not rate it".
+- Cause: `screenshots/4-cover.jpg` was 1080x1350, long side 1350 px over the scorer's 1280 px cap (sizes, count and format were all fine). The local gate in main.ts only capped screenshot bytes, not dimensions, so the local check passed while the real gate failed.
+- Fix: re-shot the same scene (`?shot=cover&photo=pier&caption=Neon Shores&layout=strip&grade=sunset`) at 1024x1280 through headless Chromium CDP (JPEG quality 82, 0 console errors). Same render (mean RGB 150.7/138.1/150.0 vs 150.8/138.2/150.1, stddev 57.7 both), new file 166,550 bytes, sha256 30e996032112c1f6c825b45cb5bc13c27299e6c7af4f7dc2f4eb41ff58b7e280.
+- Re-verified: all 4 screenshots within caps (dims and sizes); `MAKEFUN_OUTPUT_DIR=out node main.ts` exit 0; dossier.json 1,089,161 bytes, dossier text 50,149 bytes (unchanged). This package differs from the submitted commit in exactly two files: screenshots/4-cover.jpg and this TEST_RESULTS.md note.
