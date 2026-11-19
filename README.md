@@ -1,3 +1,7 @@
+[![make.fun · gta6-cover-art-01](https://make.fun/badge/gta6-cover-art-01.svg)](https://make.fun/bounty/gta6-cover-art-01?utm_source=github&utm_medium=readme&utm_campaign=gta6-cover-art-01)
+[![rank](https://make.fun/badge/gta6-cover-art-01/tukiyatlampu/gta6-cover-art-01/rank.svg)](https://make.fun/bounty/gta6-cover-art-01/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=gta6-cover-art-01)
+[![reward](https://make.fun/badge/gta6-cover-art-01/tukiyatlampu/gta6-cover-art-01/reward.svg)](https://make.fun/bounty/gta6-cover-art-01?utm_source=github&utm_medium=readme&utm_campaign=gta6-cover-art-01)
+
 # Sunset Sleeve — GTA-style cover maker
 
 **Architecture.** A zero-dependency offline web app (`app/`, plain HTML/CSS/ES modules, canvas 2D). `app/src/state.js` holds the cover state (photos, layout, grade, lettering, per-panel crop); `app/src/layouts.js` computes panel geometry per export size; `app/src/grades.js` defines the five colour grades (canvas filter + tint overlays + lettering palette); `app/src/render.js` draws the whole cover — panels, grade, gradient Anton title, glowing Pacifico subtitle, masthead tagline, film grain, vignette; `app/src/main.js` wires the editor UI, uploads and PNG export; `app/src/shots.js` provides the fixed `?shot=` scenes used for the screenshots. `main.ts` (Node 22, stdlib only) copies `app/` + `screenshots/` to the output dir and writes `dossier.json` with the vendored `vendor/makefun-app.ts`.
