@@ -1,87 +1,70 @@
-// Colour grades: how each grade treats a photo and a caption. A grade is
-// a canvas filter applied while the photo is drawn, plus one or two tint
-// overlays blended over the panel, plus the lettering palette. All of it is
-// drawn locally — no lookup tables, no network, no Rockstar assets.
+// grades.js — five Vice City grades.
+// Each grade: a CSS filter for the photo pass, a top and bottom
+// overlay colour (screen blend), a tint for the title gradient,
+// and a neon glow colour for the script subtitle.
+export const GRADES = [
+  {
+    id: "sunset",
+    name: "Sunset",
+    blurb: "Orange-pink golden hour.",
+    filter: "saturate(1.35) contrast(1.12) brightness(1.04)",
+    top: "rgba(255, 94, 58, 0.16)",
+    bottom: "rgba(168, 28, 120, 0.30)",
+    titleFrom: "#ffd166",
+    titleTo: "#ff5e7a",
+    neon: "#ff9de2",
+    glow: "#ff2e88",
+  },
+  {
+    id: "neon",
+    name: "Neon",
+    blurb: "Hot pink + cyan night drive.",
+    filter: "saturate(1.6) contrast(1.18) brightness(0.98)",
+    top: "rgba(255, 0, 128, 0.22)",
+    bottom: "rgba(0, 229, 255, 0.26)",
+    titleFrom: "#00e5ff",
+    titleTo: "#ff00a8",
+    neon: "#7df9ff",
+    glow: "#00e5ff",
+  },
+  {
+    id: "vice",
+    name: "Vice",
+    blurb: "Teal palms, purple dusk.",
+    filter: "saturate(1.25) contrast(1.08) hue-rotate(-12deg)",
+    top: "rgba(0, 210, 180, 0.14)",
+    bottom: "rgba(90, 30, 160, 0.34)",
+    titleFrom: "#7ef0d4",
+    titleTo: "#c77dff",
+    neon: "#b8ffec",
+    glow: "#7b2ff7",
+  },
+  {
+    id: "noir",
+    name: "Noir",
+    blurb: "High-contrast night, low colour.",
+    filter: "saturate(0.55) contrast(1.32) brightness(0.92)",
+    top: "rgba(20, 20, 40, 0.20)",
+    bottom: "rgba(0, 0, 0, 0.42)",
+    titleFrom: "#f5f5f5",
+    titleTo: "#ff5e5e",
+    neon: "#ffd166",
+    glow: "#ff3b30",
+  },
+  {
+    id: "candy",
+    name: "Candy",
+    blurb: "Bubblegum pop, extra punch.",
+    filter: "saturate(1.8) contrast(1.1) brightness(1.06)",
+    top: "rgba(255, 110, 199, 0.20)",
+    bottom: "rgba(255, 170, 0, 0.22)",
+    titleFrom: "#ffe259",
+    titleTo: "#ff6ec7",
+    neon: "#ff8fd3",
+    glow: "#ff1493",
+  },
+];
 
-export const GRADES = {
-  sunset: {
-    // Warm, saturated, golden hour.
-    filter: 'saturate(1.28) contrast(1.06) brightness(1.02) sepia(0.22)',
-    overlays: [
-      { type: 'linear', from: [0, 0], to: [0, 0.5], stops: [[0, 'rgba(255,214,140,0.15)'], [1, 'rgba(255,214,140,0)']], blend: 'screen' },
-      { type: 'linear', from: [0, 0], to: [0, 1], stops: [[0, 'rgba(255,183,77,0)'], [1, 'rgba(255,94,98,0.36)']], blend: 'soft-light' },
-      { type: 'linear', from: [0, 1], to: [0, 0], stops: [[0, 'rgba(123,47,247,0.30)'], [1, 'rgba(123,47,247,0)']], blend: 'overlay' },
-    ],
-    title: ['#ffe9a8', '#ffd76a', '#ff7a3d', '#ff2e88'],
-    titleStroke: '#2a0a3d',
-    script: '#ff5db1',
-    glow: 'rgba(255,46,136,0.9)',
-    scrim: 'rgba(26,8,32,0.55)',
-    grain: 0.08,
-    vignette: 0.34,
-  },
-  neon: {
-    // Electric cyan/magenta night.
-    filter: 'saturate(1.65) contrast(1.12) brightness(1.0) hue-rotate(-8deg)',
-    overlays: [
-      { type: 'linear', from: [0, 0], to: [1, 1], stops: [[0, 'rgba(34,230,255,0.20)'], [1, 'rgba(255,46,136,0.22)']], blend: 'overlay' },
-      { type: 'linear', from: [0, 1], to: [0, 0], stops: [[0, 'rgba(10,4,40,0.30)'], [1, 'rgba(10,4,40,0)']], blend: 'multiply' },
-    ],
-    title: ['#d8fbff', '#22e6ff', '#ff2e88', '#c44dff'],
-    titleStroke: '#0a061f',
-    script: '#22e6ff',
-    glow: 'rgba(34,230,255,0.95)',
-    scrim: 'rgba(6,4,24,0.55)',
-    grain: 0.1,
-    vignette: 0.4,
-  },
-  vice: {
-    // 80s pink/teal: magenta shadows, teal highlights.
-    filter: 'saturate(1.45) contrast(1.08) brightness(1.03) sepia(0.08)',
-    overlays: [
-      { type: 'linear', from: [0, 0], to: [0, 1], stops: [[0, 'rgba(0,229,199,0.16)'], [1, 'rgba(255,46,136,0.26)']], blend: 'soft-light' },
-      { type: 'linear', from: [1, 0], to: [0, 1], stops: [[0, 'rgba(255,157,226,0.14)'], [1, 'rgba(255,157,226,0)']], blend: 'screen' },
-    ],
-    title: ['#ffe3f2', '#ff9de2', '#ff2e88', '#00e5c7'],
-    titleStroke: '#33061f',
-    script: '#00e5c7',
-    glow: 'rgba(255,46,136,0.9)',
-    scrim: 'rgba(30,4,32,0.5)',
-    grain: 0.09,
-    vignette: 0.36,
-  },
-  noir: {
-    // High-contrast black and white, hard shadows.
-    filter: 'grayscale(1) contrast(1.35) brightness(1.04)',
-    overlays: [
-      { type: 'linear', from: [0, 0], to: [0, 1], stops: [[0, 'rgba(255,255,255,0.05)'], [1, 'rgba(0,0,0,0.34)']], blend: 'multiply' },
-    ],
-    title: ['#ffffff', '#f2f2f2', '#c9c9c9', '#8a8a8a'],
-    titleStroke: '#000000',
-    script: '#ffd76a',
-    glow: 'rgba(255,215,106,0.7)',
-    scrim: 'rgba(0,0,0,0.55)',
-    grain: 0.13,
-    vignette: 0.5,
-  },
-  palm: {
-    // Tropical teal-green, warm highlights.
-    filter: 'saturate(1.35) contrast(1.05) brightness(1.04) hue-rotate(6deg)',
-    overlays: [
-      { type: 'linear', from: [0, 0], to: [0, 1], stops: [[0, 'rgba(184,255,158,0.12)'], [1, 'rgba(14,122,95,0.26)']], blend: 'soft-light' },
-      { type: 'linear', from: [0, 0], to: [1, 0], stops: [[0, 'rgba(255,215,106,0.10)'], [1, 'rgba(255,215,106,0)']], blend: 'screen' },
-    ],
-    title: ['#f2ffe9', '#b8ff9e', '#2ecc71', '#ffd76a'],
-    titleStroke: '#06231a',
-    script: '#ffd76a',
-    glow: 'rgba(46,204,113,0.85)',
-    scrim: 'rgba(4,26,18,0.5)',
-    grain: 0.07,
-    vignette: 0.32,
-  },
-};
-
-/** A grade by id, falling back to sunset. */
-export function gradeOf(id) {
-  return GRADES[id] ?? GRADES.sunset;
+export function getGrade(id) {
+  return GRADES.find((g) => g.id === id) || GRADES[0];
 }
