@@ -5,7 +5,7 @@
 // Usage:  MAKEFUN_OUTPUT_DIR=out node main.ts
 //         (defaults to /output when the env var is unset)
 import { buildDossier } from "./vendor/makefun-app.ts";
-import { cpSync, existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -32,7 +32,10 @@ function copyTree(name: string): void {
 }
 
 function main(): void {
-  rmSync(outDir, { recursive: true, force: true });
+  // Never delete outDir: the grader mounts /output as a writable mount
+  // point, and rmSync on a mount point throws EBUSY ("Device or resource
+  // busy") and exits 1. The starter never removes it either — it just
+  // mkdirs and copies over whatever is there.
   mkdirSync(outDir, { recursive: true });
   copyTree("app");
   copyTree("screenshots");

@@ -136,3 +136,45 @@ Verification:
 - Grader simulation (read-only copy of the package, `MAKEFUN_OUTPUT_DIR`
   unset) → exit 0, `/output/dossier.json` written, same sha256.
   /output and the simulation copy were removed afterwards.
+
+## Round 5 fix — run_completes, EBUSY on /output (2026-11-20 ~08:30 WIB)
+
+Round 4 was rejected on one check only: `run_completes` — the dev grade run
+exited 1, no breakdown. `transcripts_witnessed` passed.
+
+Root cause (reproduced, not just inferred): the round-4 `main.ts` called
+`rmSync(outDir, { recursive: true, force: true })` with the default
+`outDir = /output`. The grader mounts /output as a writable mount point,
+and `rmSync` on a mount point throws EBUSY ("Device or resource busy") —
+uncaught → exit 1. Reproduced in this VM with `unshare -rm` + a bind
+mount: `rmSync` on the bind-mounted dir threw
+`Unknown error: Device or resource busy`, node exit 1. The round-4
+"grader simulation" missed this because it used a plain read-only copy,
+not a real mount point — `rmSync` on an ordinary directory succeeds, so
+the local test passed falsely. The starter never deletes /output; it only
+`mkdirSync`s and copies over it.
+
+Fix (only `main.ts` changed, plus this file):
+- Removed `rmSync(outDir, { recursive: true, force: true });` and the
+  `rmSync` import; `main()` now only does `mkdirSync(outDir,
+  { recursive: true })` then copies `app/` + `screenshots/` and writes
+  `dossier.json`, exactly like the starter. Default `/output` unchanged;
+  everything else byte-identical.
+
+Verification (2026-11-20 ~08:30 WIB, Node v24.22.1):
+- (a) True grader simulation — `unshare -rm`: package bind-mounted
+  read-only at /bot (`/dev/mapper/rv … (ro,…)`), scratch dir bind-mounted
+  at /output (real mount point, tmpfs), `MAKEFUN_OUTPUT_DIR` unset,
+  `node /bot/main.ts` → **exit 0**, `wrote /output/dossier.json
+  (1038158 bytes)`. Dossier sha256
+  `bc5e41195499027ec3bb0c347c84a40f25837506092e14da418c6f1834373565`
+  (identical to the round-3/round-4 dossier — main.ts is not part of it).
+- (b) Local run — `MAKEFUN_OUTPUT_DIR=/tmp/r5-sim/out-local node
+  main.ts` → **exit 0**; dossier sha256 identical to (a), `cmp` confirms
+  byte-identical.
+- (c) Caps, from the grader-sim output: 4 screenshots (182701 / 185249 /
+  213907 / 170709 bytes, each ≤ 262144), `app/` 13 files + 4 dirs = 17
+  entries (≤ 993), 654990 bytes (≤ 48 MiB), dossier 1038158 bytes,
+  `dossier.images` = 4. `buildDossier` enforces the caps and exited 0.
+- Sim outputs live only in /tmp/r5-sim (outside the package); no extra
+  files were added to the package dir.
